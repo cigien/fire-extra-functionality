@@ -1,8 +1,21 @@
-const path = require('path');
-const webpack = require('webpack'); // for the banner plugin
-const userscriptInfo = require('./package.json');
+import fs from "fs";
+import path from 'path';
+import webpack from "webpack";
+const { BannerPlugin } = webpack; // for the banner plugin
 
-module.exports = {
+const { version } = fs.readFileSync("./package.json");
+
+const src = path.resolve(process.cwd(), 'src');
+
+const fallback = () => {
+    const paths = fs.readdirSync(src);
+    const output = {};
+    paths.forEach((mpath) =>
+        output[`./${mpath.replace(".ts", ".js")}`] = path.join(src, mpath));
+    return output;
+};
+
+export default /** @type {webpack.Configuration} */({
     entry: './src/index.ts',
     mode: 'none',
     target: 'node',
@@ -15,14 +28,15 @@ module.exports = {
     },
     resolve: {
         // Add '.ts' and '.tsx' as a resolvable extension.
-        extensions: ['.webpack.js', '.web.js', '.ts', '.tsx', '.js']
+        extensions: ['.webpack.js', '.web.js', '.ts', '.tsx', '.js'],
+        fallback: fallback()
     },
     plugins: [
-        new webpack.BannerPlugin({
+        new BannerPlugin({
             raw: true,
             banner: `// ==UserScript==
                      // @name        FIRE Additional Functionality
-                     // @version     ${userscriptInfo.version}
+                     // @version     ${version}
                      // @author      double-beep
                      // @contributor Xnero
                      // @match       https://chat.stackexchange.com/rooms/11540/charcoal-hq
@@ -45,16 +59,16 @@ module.exports = {
                      //     window.dispatchEvent(new CustomEvent('fire-popup-appeared'));
                      // before L1253 - hideReportImages(). This will fire an event when the FIRE popup opens which this userscript listens to.
                      // The script only runs on Charcoal HQ (11540) for now.`.replace(/^\s+/mg, '')
-        })
+        }),
     ],
     module: {
         rules: [
             // all files with a '.ts' or '.tsx' extension will be handled by 'ts-loader'
             {
                 test: /\.tsx?$/,
-                include: path.resolve(__dirname, 'src'),
+                include: path.resolve(src),
                 loader: 'ts-loader'
             }
         ]
     }
-}
+});
