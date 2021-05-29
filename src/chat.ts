@@ -21,7 +21,8 @@ interface ChatResponse {
 
 type MessageActions = 'watch' | 'blacklist' | 'approve';
 
-type RoomIdGetter = {
+const charcoalRoomId = 11540;
+/*type RoomIdGetter = {
   (): number;
   id?: number;
 };
@@ -30,7 +31,7 @@ const getCurrentRoomId: RoomIdGetter = () =>
     getCurrentRoomId.id ||
   (getCurrentRoomId.id = Number(
       /\/rooms\/(\d+)\//.exec(globalThis.location.pathname)?.[1]
-  ));
+  ));*/
 
 const smokeDetectorId = 120914;
 const metasmokeId = 478536;
@@ -72,7 +73,7 @@ async function sendActionMessageToChat(
     params.append('fkey', userFkey);
 
     const chatNewMessageCall = await fetch(
-        `/chats/${getCurrentRoomId()}/messages/new`,
+        `/chats/${charcoalRoomId}/messages/new`,
         {
             method: 'POST',
             body: params,
