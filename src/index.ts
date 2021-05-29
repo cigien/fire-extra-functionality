@@ -17,7 +17,7 @@ declare const fire: {
     }
 };
 
-await Promise.resolve("testing");
+await Promise.resolve('testing');
 
 const metasmokeSearchUrl = 'https://metasmoke.erwaysoftware.com/search';
 
