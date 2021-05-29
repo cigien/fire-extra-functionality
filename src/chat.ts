@@ -32,15 +32,15 @@ const getCurrentRoomId: RoomIdGetter = () =>
       /\/rooms\/(\d+)\//.exec(globalThis.location.pathname)?.[1]
   ));
 
+const smokeDetectorId = 120914;
+const metasmokeId = 478536;
+// once the script is ready to work to rooms other than Charcoal HQ, these lines should be uncommented
+/*
 type HostGetter = {
   (): string;
   host?: string;
 };
-
-const getHost: HostGetter = () =>
-    getHost.host || (getHost.host = globalThis.location.host);
-
-// Copied from FIRE
+const getHost: HostGetter = () => getHost.host || (getHost.host = globalThis.location.host);
 const getSmokeDetectorId = () =>
     ({
         'chat.stackexchange.com': 120914,
@@ -54,6 +54,7 @@ const getMetasmokeId = () =>
         'chat.stackoverflow.com': 14262788,
         'chat.meta.stackexchange.com': 848503,
     }[getHost()]);
+*/
 
 async function sendActionMessageToChat(
     messageType: MessageActions,
@@ -153,16 +154,9 @@ export async function newChatEventOccurred({
     user_id,
     content,
 }: ChatEvent): Promise<void> {
-    if (
-        (user_id !== getSmokeDetectorId() && user_id !== getMetasmokeId()) ||
-    event_type !== 1
-    )
-        return;
+    if ((user_id !== smokeDetectorId && user_id !== metasmokeId) || event_type !== 1) return;
     const parsedContent = new DOMParser().parseFromString(content, 'text/html');
     updateWatchesAndBlacklists(parsedContent);
-    const newGithubPrInfo = await github.getUpdatedGithubPullRequestInfo(
-        parsedContent
-    );
-    if (!newGithubPrInfo) return;
-    Domains.githubPullRequests = newGithubPrInfo;
+    const newGithubPrInfo = await github.getUpdatedGithubPullRequestInfo(parsedContent);
+    if (newGithubPrInfo) Domains.githubPullRequests = newGithubPrInfo;
 }
